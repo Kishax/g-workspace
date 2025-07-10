@@ -128,17 +128,45 @@ jobs:
       - name: マージされたブランチの情報収集
         id: merged-info
         run: |
+          echo "🔍 マージ情報を収集中..."
+          
           # 最新のマージコミットを取得
           merge_commit=$(git log --merges --oneline -1 --pretty=format:"%H %s")
           echo "merge_commit=$merge_commit" >> $GITHUB_OUTPUT
-
-          # マージされたブランチ名を推測
+          echo "📝 マージコミット: $merge_commit"
+          
+          # マージされたブランチ名を複数の方法で取得
+          branch_name=""
+          
+          # 方法1: マージコミットメッセージから抽出
           if [[ "$merge_commit" =~ "Merge pull request" ]]; then
             branch_name=$(echo "$merge_commit" | grep -o 'from [^/]*/[^[:space:]]*' | cut -d'/' -f2-)
-            echo "merged_branch=$branch_name" >> $GITHUB_OUTPUT
+            echo "🌿 方法1で取得: $branch_name"
           fi
+          
+          # 方法2: git show-branchから取得
+          if [[ -z "$branch_name" ]]; then
+            branch_name=$(git show-branch --merge-base HEAD~1 HEAD | grep -o '\[.*\]' | head -1 | tr -d '[]')
+            echo "🌿 方法2で取得: $branch_name"
+          fi
+          
+          # 方法3: 直前のコミットから推測
+          if [[ -z "$branch_name" ]]; then
+            branch_name=$(git log --oneline -1 --pretty=format:"%s" | grep -o 'feature/[^[:space:]]*\|fix/[^[:space:]]*\|hotfix/[^[:space:]]*' | head -1)
+            echo "🌿 方法3で取得: $branch_name"
+          fi
+          
+          # デフォルト値を設定
+          if [[ -z "$branch_name" ]]; then
+            branch_name="unknown-branch"
+            echo "⚠️ ブランチ名を特定できませんでした"
+          fi
+          
+          echo "merged_branch=$branch_name" >> $GITHUB_OUTPUT
+          echo "✅ 最終的なブランチ名: $branch_name"
 
       - name: PR作成通知
+        if: false  # この通知は無効化（develop pushではPR情報が取得できないため）
         uses: 8398a7/action-slack@v3
         with:
           status: success
@@ -183,7 +211,8 @@ jobs:
             📂 *プロジェクト*: ${{ github.repository }}
             🌿 *ブランチ*: `${{ steps.merged-info.outputs.merged_branch }}` → `develop`
             👤 *担当者*: ${{ github.actor }}
-            📅 *時刻*: $(date +'%Y-%m-%d %H:%M:%S')
+            📅 *時刻*: ${{ github.event.head_commit.timestamp }}
+            🔗 *コミット*: ${{ github.event.head_commit.message }}
 
             次のステップ: ローカルで `make sync` を実行してください
         env:
