@@ -54,8 +54,17 @@ branch-list:
 sync:
 	@echo "🔄 developブランチを最新に同期中..."
 	git checkout develop
+	git fetch origin
 	git pull --rebase origin develop
 	@echo "✅ developブランチが最新になりました"
+
+# developブランチの完全同期
+sync-force:
+	@echo "🔄 developブランチを完全同期中..."
+	git checkout develop
+	git fetch origin
+	git reset --hard origin/develop
+	@echo "✅ developブランチがリモートと同期しました"
 
 # 新しいfeatureブランチを作成
 new-feature:
@@ -189,18 +198,3 @@ workflow:
 	@echo "   make sync          # developを最新に"
 	@echo "   make cleanup       # 不要ブランチ削除"
 	@echo "   make fetch         # リモート情報更新"
-
-# developブランチの完全同期
-sync-develop:
-	@echo "🔄 developブランチを完全同期中..."
-	git checkout develop
-	git fetch origin
-	git reset --hard origin/develop
-	@echo "✅ developブランチがリモートと同期しました"
-
-# マージ後の処理
-merge-and-push:
-	@echo "📤 developブランチの変更をリモートにpush中..."
-	git checkout develop
-	git push origin develop
-	@echo "✅ リモートと同期完了"
