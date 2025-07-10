@@ -14,7 +14,11 @@ jobs:
       - name: Check commit messages
         run: |
           echo "Checking commit messages..."
-          git log --oneline origin/develop..HEAD | while read line; do
+          git log --oneline --no-merges origin/develop..HEAD | while read line; do
+            if [ -z "$line" ]; then
+              echo "No commits to check"
+              exit 0
+            fi
             commit_msg=$(echo "$line" | cut -d' ' -f2-)
             if ! echo "$commit_msg" | grep -qE "^(feat|feature|fix|update|docs|style|refactor|test|chore)(\(.+\))?: .+"; then
               echo "❌ Invalid commit message: $commit_msg"
