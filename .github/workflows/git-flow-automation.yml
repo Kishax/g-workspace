@@ -3,6 +3,13 @@
 
 name: Git-Flow Automation
 
+# GitHub ActionsのGITHUB_TOKENに必要な権限を設定
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: read
+
 on:
   # PRが作成・更新された時
   pull_request:
