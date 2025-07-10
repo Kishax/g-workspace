@@ -3,19 +3,26 @@
 
 name: Git-Flow Automation
 
+# GitHub ActionsのGITHUB_TOKENに必要な権限を設定
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: read
+
 on:
   # PRが作成・更新された時
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [develop]
 
-  # developブランチにpushされた時（PRマージ後）
+  # developブランチまたはmainブランチにpushされた時
   push:
-    branches: [develop]
-  
-  # mainブランチにpushされた時（リリース時）
-  push:
-    branches: [main]
+    branches: [develop, main]
+
+  # 週次メンテナンス
+  schedule:
+    - cron: "0 9 * * 1"
 
 jobs:
   # 1. PR作成時の自動チェック
@@ -23,26 +30,26 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     name: "PR検証"
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: ブランチ名チェック
         run: |
           branch_name="${{ github.head_ref }}"
           echo "🔍 ブランチ名チェック: $branch_name"
-          
+
           if [[ ! $branch_name =~ ^(feature|fix|hotfix)/.+ ]]; then
             echo "❌ ブランチ名が Git-Flow 規約に従っていません"
             echo "正しい形式: feature/xxx, fix/xxx, hotfix/xxx"
             exit 1
           fi
-          
+
           echo "✅ ブランチ名が正しい形式です"
-      
+
       - name: コミットメッセージチェック
         run: |
           echo "📝 コミットメッセージをチェック中..."
@@ -51,7 +58,7 @@ jobs:
               echo "ℹ️ チェックするコミットがありません"
               exit 0
             fi
-            
+
             commit_msg=$(echo "$line" | cut -d' ' -f2-)
             if ! echo "$commit_msg" | grep -qE "^(feat|feature|fix|update|docs|style|refactor|test|chore)(\(.+\))?: .+"; then
               echo "❌ 無効なコミットメッセージ: $commit_msg"
@@ -62,7 +69,7 @@ jobs:
               echo "✅ 有効なコミットメッセージ: $commit_msg"
             fi
           done
-      
+
       - name: PR情報の自動コメント
         uses: actions/github-script@v7
         with:
@@ -72,35 +79,35 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number,
             });
-            
+
             // ファイル変更数を取得
             const { data: files } = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.issue.number,
             });
-            
+
             const comment = `
             ## 🤖 自動PR分析レポート
-            
+
             **📊 変更統計:**
             - 変更ファイル数: ${files.length}
             - 追加行数: ${pr.additions}
             - 削除行数: ${pr.deletions}
-            
+
             **📁 変更ファイル:**
             ${files.map(file => `- \`${file.filename}\` (+${file.additions}/-${file.deletions})`).join('\n')}
-            
+
             **✅ チェック項目:**
             - [x] ブランチ名がGit-Flow規約に準拠
             - [x] コミットメッセージが規約に準拠
             - [ ] 動作確認済み（手動確認してください）
             - [ ] ドキュメント更新（必要に応じて）
-            
+
             ---
             *このコメントは自動生成されました*
             `;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -113,50 +120,93 @@ jobs:
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
     runs-on: ubuntu-latest
     name: "develop更新後処理"
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: マージされたブランチの情報収集
         id: merged-info
         run: |
           # 最新のマージコミットを取得
           merge_commit=$(git log --merges --oneline -1 --pretty=format:"%H %s")
           echo "merge_commit=$merge_commit" >> $GITHUB_OUTPUT
-          
+
           # マージされたブランチ名を推測
           if [[ "$merge_commit" =~ "Merge pull request" ]]; then
             branch_name=$(echo "$merge_commit" | grep -o 'from [^/]*/[^[:space:]]*' | cut -d'/' -f2-)
             echo "merged_branch=$branch_name" >> $GITHUB_OUTPUT
           fi
-      
-      - name: Slack/Discord通知（オプション）
-        if: steps.merged-info.outputs.merged_branch != ''
-        run: |
-          echo "🎉 developブランチが更新されました!"
-          echo "マージされたブランチ: ${{ steps.merged-info.outputs.merged_branch }}"
-          echo "コミット: ${{ steps.merged-info.outputs.merge_commit }}"
-          # ここにSlack/Discord webhook URLを設定すれば通知可能
+
+      - name: PR作成通知
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: "#development"
+          text: |
+            📝 *新しいPRが作成されました*
+
+            **タイトル**: ${{ github.event.pull_request.title }}
+            **作成者**: ${{ github.actor }}
+            **ブランチ**: `${{ github.head_ref }}` → `develop`
+            **リンク**: ${{ github.event.pull_request.html_url }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: エラー通知
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: "#development"
+          text: |
+            ❌ *ワークフローでエラーが発生しました*
+
+            **リポジトリ**: ${{ github.repository }}
+            **ブランチ**: ${{ github.ref }}
+            **実行者**: ${{ github.actor }}
+            **エラー詳細**: GitHub Actionsのログを確認してください
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: 詳細Slack通知
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: "#development"
+          username: "Git-Flow Bot"
+          icon_emoji: ":robot_face:"
+          text: |
+            🚀 **開発進捗通知**
+
+            ✅ **ステータス**: PRマージ完了
+            📂 **プロジェクト**: ${{ github.repository }}
+            🌿 **ブランチ**: `${{ steps.merged-info.outputs.merged_branch }}` → `develop`
+            👤 **担当者**: ${{ github.actor }}
+            📅 **時刻**: $(date +'%Y-%m-%d %H:%M:%S')
+
+            次のステップ: ローカルで `make sync` を実行してください
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   # 3. mainブランチ更新時（リリース時）の自動処理
   main-released:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     name: "リリース処理"
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: バージョンタグの自動作成
         run: |
           # 最新のタグを取得
           latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "最新タグ: $latest_tag"
-          
+
           # バージョンを自動インクリメント（簡易版）
           if [[ $latest_tag =~ v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
             major=${BASH_REMATCH[1]}
@@ -167,15 +217,15 @@ jobs:
           else
             new_tag="v1.0.0"
           fi
-          
+
           echo "新しいタグ: $new_tag"
-          
+
           # タグを作成
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a $new_tag -m "Release $new_tag"
           git push origin $new_tag
-      
+
       - name: リリースノート自動生成
         uses: actions/github-script@v7
         with:
@@ -185,33 +235,33 @@ jobs:
               repo: context.repo.repo,
               per_page: 2
             });
-            
+
             if (tags.length >= 2) {
               const latestTag = tags[0].name;
               const previousTag = tags[1].name;
-              
+
               const { data: comparison } = await github.rest.repos.compareCommits({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 base: previousTag,
                 head: latestTag
               });
-              
+
               const releaseNotes = `
               ## 🚀 Release ${latestTag}
-              
+
               **📈 変更統計:**
               - Total commits: ${comparison.total_commits}
               - Files changed: ${comparison.files.length}
-              
+
               **📝 変更内容:**
               ${comparison.commits.map(commit => 
                 `- ${commit.commit.message.split('\n')[0]} (${commit.sha.substring(0, 7)})`
               ).join('\n')}
-              
+
               **🔗 Full Changelog:** https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${previousTag}...${latestTag}
               `;
-              
+
               await github.rest.repos.createRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -225,18 +275,16 @@ jobs:
 
   # 4. 定期的なメンテナンス
   weekly-maintenance:
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     name: "週次メンテナンス"
-    # 毎週月曜日の9時に実行
-    schedule:
-      - cron: '0 9 * * 1'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: 古いブランチの検出
         run: |
           echo "🔍 30日以上更新されていないブランチを検出..."
@@ -249,7 +297,7 @@ jobs:
               fi
             fi
           done
-      
+
       - name: Issues/PRの統計レポート
         uses: actions/github-script@v7
         with:
@@ -259,24 +307,24 @@ jobs:
               repo: context.repo.repo,
               state: 'open'
             });
-            
+
             const { data: openIssues } = await github.rest.issues.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open'
             });
-            
+
             console.log(`📊 週次レポート:`);
             console.log(`- オープンなPR: ${openPRs.length}件`);
             console.log(`- オープンなIssue: ${openIssues.length}件`);
-            
+
             // 長期間オープンなPRを検出
             const oldPRs = openPRs.filter(pr => {
               const createdAt = new Date(pr.created_at);
               const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
               return createdAt < weekAgo;
             });
-            
+
             if (oldPRs.length > 0) {
               console.log(`⚠️ 1週間以上オープンなPR: ${oldPRs.length}件`);
               oldPRs.forEach(pr => {
