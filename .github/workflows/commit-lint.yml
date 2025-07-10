@@ -1,0 +1,29 @@
+name: Commit Message Check
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  commit-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        run: |
+          echo "Checking commit messages..."
+          git log --oneline --no-merges origin/develop..HEAD | while read line; do
+            if [ -z "$line" ]; then
+              echo "No commits to check"
+              exit 0
+            fi
+            commit_msg=$(echo "$line" | cut -d' ' -f2-)
+            if ! echo "$commit_msg" | grep -qE "^(feat|feature|fix|update|docs|style|refactor|test|chore)(\(.+\))?: .+"; then
+              echo "❌ Invalid commit message: $commit_msg"
+              exit 1
+            else
+              echo "✅ Valid commit message: $commit_msg"
+            fi
+          done
