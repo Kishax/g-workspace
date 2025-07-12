@@ -37,6 +37,12 @@ help:
 	@echo "create-tag      : リリースタグ作成 (VERSION=v1.0.0)"
 	@echo "release-status  : リリース状況確認"
 	@echo ""
+	@echo "=== 実行コマンド ==="
+	@echo "run-linux       : Linux実行ファイルを起動"
+	@echo "run-web         : Web PWAをローカルサーバーで起動"
+	@echo "build-run-linux : ビルド→Linux実行"
+	@echo "build-run-web   : ビルド→Web実行"
+	@echo ""
 	@echo "=== 使用例 ==="
 	@echo "make new-feature NAME=user-login"
 	@echo "make commit MSG=\"feat: ユーザーログイン機能を追加\""
@@ -326,6 +332,39 @@ release-status:
 	@echo ""
 	@echo "=== リリースページ ==="
 	@echo "🔗 https://github.com/Kishax/g-workspace/releases"
+
+# ビルドファイル実行コマンド
+run-linux:
+	@echo "🐧 Linux実行ファイルを起動中..."
+	@if [ -f "flet_app/dist/Kishax-G" ]; then \
+		echo "✅ 実行ファイルが見つかりました"; \
+		cd flet_app/dist && ./Kishax-G; \
+	else \
+		echo "❌ 実行ファイルが見つかりません"; \
+		echo "💡 まず make build-linux を実行してください"; \
+	fi
+
+run-web:
+	@echo "🌐 Web PWAをローカルサーバーで起動中..."
+	@if [ -f "flet_app/dist/index.html" ]; then \
+		echo "✅ Webファイルが見つかりました"; \
+		echo "📱 ブラウザで http://localhost:8080 にアクセスしてください"; \
+		cd flet_app && python -m http.server 8080 --directory dist; \
+	else \
+		echo "❌ Webファイルが見つかりません"; \
+		echo "💡 まず make build-web を実行してください"; \
+	fi
+
+# ビルド＋実行の一連コマンド
+build-run-linux:
+	@echo "🔄 Linux: ビルド → 実行"
+	@$(MAKE) build-linux
+	@$(MAKE) run-linux
+
+build-run-web:
+	@echo "🔄 Web: ビルド → 実行"
+	@$(MAKE) build-web
+	@$(MAKE) run-web
 
 # 開発フロー確認
 workflow:

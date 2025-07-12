@@ -446,6 +446,38 @@ make build-linux build-web
 make build-macos build-ios build-web
 ```
 
+### 🚀 ビルドファイルの実行
+
+#### Linux実行ファイル
+```bash
+# ビルド済みファイルを実行
+make run-linux
+
+# ビルド → 実行（一連の流れ）
+make build-run-linux
+
+# 手動実行
+./flet_app/dist/Kishax-G
+```
+
+**出力先**: `flet_app/dist/Kishax-G` (約60MB)
+
+#### Web PWA
+```bash
+# ローカルサーバーで起動
+make run-web
+
+# ビルド → 実行（一連の流れ）
+make build-run-web
+
+# 手動実行
+cd flet_app
+python -m http.server 8080 --directory dist
+# ブラウザで http://localhost:8080 にアクセス
+```
+
+**出力先**: `flet_app/dist/` (Web ファイル一式)
+
 ### 📱 アプリストア配布
 
 #### Google Play Store（Android）
