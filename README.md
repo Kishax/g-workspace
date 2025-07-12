@@ -155,6 +155,46 @@ python flet_app/main.py
 - ✅ Redis（ポート6379）のみ起動  
 - ❌ アプリケーション（FastAPI/Streamlit/Flet）は起動しません
 
+### 🐳 Docker管理コマンド
+
+#### 起動状況確認
+```bash
+# 現在のコンテナ状況を確認
+docker compose ps
+
+# すべてのDockerコンテナを確認（他プロジェクト含む）
+docker ps
+```
+
+#### インフラ停止
+```bash
+# プロジェクトのコンテナを停止・削除
+docker compose down
+
+# 特定サービスのみ停止
+docker compose stop db redis
+```
+
+#### システムクリーンアップ
+```bash
+# 未使用のコンテナ・ネットワーク・イメージを削除
+docker system prune -f
+
+# ボリュームも含めて完全クリーンアップ（注意：データが削除されます）
+docker system prune -a --volumes -f
+```
+
+#### よく使うパターン
+```bash
+# 完全リセット（開発環境のトラブル時）
+docker compose down
+docker system prune -f
+docker compose up db redis -d
+
+# 起動確認
+docker compose ps
+```
+
 ### 💡 環境変数の詳細
 
 `.env.example`ファイルには設定項目が明確に分類されています：
