@@ -17,10 +17,37 @@ help:
 	@echo "cleanup      : マージ済みブランチの削除"
 	@echo "emergency    : developブランチをリモートから強制復元"
 	@echo ""
+	@echo "=== Fletデバッグコマンド ==="
+	@echo "flet-debug   : Fletアプリをデスクトップモードで起動"
+	@echo "flet-web     : Fletアプリをブラウザモードで起動（実機テスト可能）"
+	@echo "flet-simple  : シンプルなデバッグテスト"
+	@echo ""
+	@echo "=== Fletビルドコマンド ==="
+	@echo "build-android   : Android APKビルド"
+	@echo "build-ios       : iOS IPAビルド (macOSのみ)"
+	@echo "build-macos     : macOS APPビルド (macOSのみ)"
+	@echo "build-windows   : Windows EXEビルド (Windowsのみ)"
+	@echo "build-linux     : Linux AppImageビルド"
+	@echo "build-web       : Web PWAビルド"
+	@echo "build-check     : ビルド環境チェック"
+	@echo ""
+	@echo "=== 配布・リリースコマンド ==="
+	@echo "release         : 現在環境でリリースビルド"
+	@echo "package-current : 現在環境用パッケージ作成"
+	@echo "create-tag      : リリースタグ作成 (VERSION=v1.0.0)"
+	@echo "release-status  : リリース状況確認"
+	@echo ""
+	@echo "=== 実行コマンド ==="
+	@echo "run-linux       : Linux実行ファイルを起動"
+	@echo "run-web         : Web PWAをローカルサーバーで起動"
+	@echo "build-run-linux : ビルド→Linux実行"
+	@echo "build-run-web   : ビルド→Web実行"
+	@echo ""
 	@echo "=== 使用例 ==="
 	@echo "make new-feature NAME=user-login"
 	@echo "make commit MSG=\"feat: ユーザーログイン機能を追加\""
 	@echo "make new-fix NAME=issue-123"
+	@echo "make flet-web  # 実機でhttp://localhost:8080にアクセス"
 
 # 初期設定
 setup:
@@ -175,6 +202,169 @@ fetch:
 	@echo "📡 リモートブランチ情報を更新中..."
 	git fetch --all --prune
 	@echo "✅ リモート情報を更新しました"
+
+# Fletデバッグ関連コマンド
+flet-debug:
+	@echo "🐛 Fletアプリをデスクトップモードでデバッグ起動中..."
+	python flet_app/main.py
+
+flet-web:
+	@echo "🌐 Fletアプリをブラウザモードでデバッグ起動中..."
+	@echo "📱 実機テスト: http://localhost:8080 にアクセス"
+	python -c "import flet as ft; from flet_app.main import main; ft.app(target=main, view=ft.WEB_BROWSER, port=8080)"
+
+flet-simple:
+	@echo "🔍 Fletシンプルデバッグテスト起動中..."
+	@echo "📱 実機テスト: http://localhost:8080 にアクセス"
+	python flet_debug_simple.py
+
+# Fletクロスプラットフォームビルドコマンド
+build-android:
+	@echo "📱 Android APKをビルド中..."
+	@echo "📋 要件: Android Studio, Android SDK"
+	@echo "❌ 現在のFletバージョンではサポートされていません"
+	@echo "代替案: flet publish でWebアプリとして配布"
+
+build-ios:
+	@echo "📱 iOS IPAをビルド中..."
+	@echo "📋 要件: macOS, Xcode"
+	@echo "❌ 現在のFletバージョンではサポートされていません"
+	@echo "代替案: flet publish でWebアプリとして配布"
+
+build-macos:
+	@echo "🖥️ macOS APPをビルド中..."
+	@echo "📋 要件: macOS"
+	cd flet_app && flet pack main.py --name "Kishax-G" --verbose
+
+build-windows:
+	@echo "🖥️ Windows EXEをビルド中..."
+	@echo "📋 要件: Windows"
+	cd flet_app && flet pack main.py --name "Kishax-G" --verbose
+
+build-linux:
+	@echo "🐧 Linux実行ファイルをビルド中..."
+	cd flet_app && flet pack main.py --name "Kishax-G" --verbose
+
+build-web:
+	@echo "🌐 Web PWAをビルド中..."
+	cd flet_app && flet publish main.py --verbose
+
+# 全プラットフォーム対応状況確認
+build-check:
+	@echo "🔍 ビルド環境チェック中..."
+	@echo ""
+	@echo "=== Fletインストール状況 ==="
+	@flet --version || echo "❌ Fletがインストールされていません: pip install flet"
+	@echo ""
+	@echo "=== プラットフォーム別要件 ==="
+	@echo "📱 Android: Android Studio + Android SDK"
+	@echo "📱 iOS: macOS + Xcode (macOSのみ)"
+	@echo "🖥️ macOS: macOS環境"
+	@echo "🖥️ Windows: Windows環境"
+	@echo "🐧 Linux: 現在の環境で利用可能"
+	@echo "🌐 Web: 全環境で利用可能"
+	@echo ""
+	@echo "📋 現在の環境:"
+	@uname -s
+
+# 配布用リリースコマンド
+release:
+	@echo "🚀 全プラットフォーム向けリリースビルド開始..."
+	@echo "📋 注意: 各プラットフォーム固有の環境が必要です"
+	@echo ""
+	@$(MAKE) build-check
+	@echo ""
+	@echo "🏗️ 現在の環境で可能なビルドを実行中..."
+	@$(MAKE) build-linux build-web
+	@echo ""
+	@echo "✅ リリースビルド完了！"
+	@echo "📦 出力先:"
+	@echo "   - Linux: flet_app/build/linux/"
+	@echo "   - Web:   flet_app/build/web/"
+	@echo ""
+	@echo "🌐 GitHub Actions で全プラットフォームビルド:"
+	@echo "   git tag v1.0.0 && git push origin v1.0.0"
+
+# 現在の環境用パッケージ作成
+package-current:
+	@echo "📦 現在の環境用パッケージ作成中..."
+	@OS=$$(uname -s); \
+	case $$OS in \
+		Linux) $(MAKE) build-linux build-web ;; \
+		Darwin) $(MAKE) build-macos build-ios build-web ;; \
+		MINGW*|CYGWIN*|MSYS*) $(MAKE) build-windows build-web ;; \
+		*) echo "❌ 未対応の環境: $$OS" ;; \
+	esac
+	@echo "✅ パッケージ作成完了！"
+
+# 全プラットフォームパッケージ作成（GitHub Actions用）
+package-all:
+	@echo "📦 全プラットフォームパッケージ作成..."
+	@echo "⚠️ このコマンドはGitHub Actionsで実行されます"
+	@echo ""
+	@echo "手動実行する場合:"
+	@echo "1. git tag v1.0.0"
+	@echo "2. git push origin v1.0.0"
+	@echo "3. GitHub Actions が自動実行されます"
+
+# リリースタグ作成
+create-tag:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "❌ エラー: VERSION=バージョン を指定してください"; \
+		echo "例: make create-tag VERSION=v1.0.0"; \
+		exit 1; \
+	fi
+	@echo "🏷️ リリースタグ作成中: $(VERSION)"
+	git tag $(VERSION)
+	git push origin $(VERSION)
+	@echo "✅ タグ作成完了！GitHub Actions でビルドが開始されます"
+	@echo "📊 進行状況: https://github.com/Kishax/g-workspace/actions"
+
+# リリース状況確認
+release-status:
+	@echo "📊 最新リリース状況確認..."
+	@echo ""
+	@echo "=== 最新タグ ==="
+	@git tag --sort=-version:refname | head -5 || echo "タグなし"
+	@echo ""
+	@echo "=== GitHub Actions ==="
+	@echo "🔗 https://github.com/Kishax/g-workspace/actions"
+	@echo ""
+	@echo "=== リリースページ ==="
+	@echo "🔗 https://github.com/Kishax/g-workspace/releases"
+
+# ビルドファイル実行コマンド
+run-linux:
+	@echo "🐧 Linux実行ファイルを起動中..."
+	@if [ -f "flet_app/dist/Kishax-G" ]; then \
+		echo "✅ 実行ファイルが見つかりました"; \
+		cd flet_app/dist && ./Kishax-G; \
+	else \
+		echo "❌ 実行ファイルが見つかりません"; \
+		echo "💡 まず make build-linux を実行してください"; \
+	fi
+
+run-web:
+	@echo "🌐 Web PWAをローカルサーバーで起動中..."
+	@if [ -f "flet_app/dist/index.html" ]; then \
+		echo "✅ Webファイルが見つかりました"; \
+		echo "📱 ブラウザで http://localhost:8080 にアクセスしてください"; \
+		cd flet_app && python -m http.server 8080 --directory dist; \
+	else \
+		echo "❌ Webファイルが見つかりません"; \
+		echo "💡 まず make build-web を実行してください"; \
+	fi
+
+# ビルド＋実行の一連コマンド
+build-run-linux:
+	@echo "🔄 Linux: ビルド → 実行"
+	@$(MAKE) build-linux
+	@$(MAKE) run-linux
+
+build-run-web:
+	@echo "🔄 Web: ビルド → 実行"
+	@$(MAKE) build-web
+	@$(MAKE) run-web
 
 # 開発フロー確認
 workflow:

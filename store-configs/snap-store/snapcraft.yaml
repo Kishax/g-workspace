@@ -1,0 +1,81 @@
+name: kishax-g
+base: core22
+version: '1.0.0'
+summary: Google Workspace代替オープンソースアプリ
+description: |
+  Kishax Gは、Google Workspaceの機能を統合したオープンソースの生産性向上アプリです。
+  
+  主な機能:
+  • メール管理 - 複数アカウント対応
+  • ファイル管理 - クラウドストレージ統合  
+  • ダッシュボード - 一元管理画面
+  • AI統合 - スパム検出と分析
+  • セキュア認証 - Discord OAuth2
+  
+  特徴:
+  • オープンソース - 完全な透明性
+  • クロスプラットフォーム - 統一体験
+  • プライバシー重視 - ユーザーデータ制御
+  • 高度なカスタマイズ性
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  kishax-g:
+    command: bin/kishax-g
+    extensions: [gnome]
+    plugs:
+      - home
+      - network
+      - network-bind
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+      - audio-playback
+      - camera
+      - removable-media
+      - gsettings
+
+parts:
+  kishax-g:
+    plugin: python
+    source: .
+    source-type: local
+    python-requirements:
+      - requirements.txt
+    python-packages:
+      - flet
+    stage-packages:
+      - libgtk-3-0
+      - libgdk-pixbuf2.0-0
+      - libglib2.0-0
+      - libcairo2
+      - libpango-1.0-0
+      - libatk1.0-0
+      - libcairo-gobject2
+      - libgtk-3-0
+      - libgdk-pixbuf2.0-0
+    override-build: |
+      craftctl default
+      # Fletアプリをビルド
+      cd $CRAFT_PART_SRC/flet_app
+      python -m flet build linux --verbose
+      # 実行ファイルをインストール
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cp -r build/linux/* $CRAFT_PART_INSTALL/bin/
+      # 実行権限を付与
+      chmod +x $CRAFT_PART_INSTALL/bin/kishax_g_app
+      # エントリポイント作成
+      cat > $CRAFT_PART_INSTALL/bin/kishax-g << 'EOF'
+#!/bin/bash
+cd "$SNAP"
+exec "$SNAP/bin/kishax_g_app" "$@"
+EOF
+      chmod +x $CRAFT_PART_INSTALL/bin/kishax-g
