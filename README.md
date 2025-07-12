@@ -1,15 +1,26 @@
-# g-workspace
+# Kishax G Project - フルスタックPython
 
-調整中。
+Google Workspace代替システムのフルスタックPython実装
 
 ## 📋 プロジェクト概要
 
-調整中。
+フルスタックPythonアーキテクチャを採用し、Web・モバイル・デスクトップすべてをPythonで統一開発できるGoogle Workspace代替システムです。
 
 ## 🛠️ 開発環境
 
 ### 使用技術スタック
 
+- **Backend**: FastAPI + SQLAlchemy + PostgreSQL
+- **Frontend Web**: Streamlit
+- **Frontend Mobile/Desktop**: Flet (Flutter + Python)
+- **Cache**: Redis
+- **Task Queue**: Celery
+- **AI/ML**: OpenAI API + scikit-learn
+- **File Storage**: AWS S3
+- **Email**: Amazon SES
+- **Auth**: Discord OAuth2
+- **Container**: Docker + Docker Compose
+- **Monitoring**: Prometheus + Grafana
 - **LSP (Language Server Protocol)**: Pyright
 - **コードフォーマッター**: Ruff (Python)
 - **YAML/YMLフォーマッター**: Prettier

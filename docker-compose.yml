@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/kishax_g
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  streamlit:
+    build: .
+    ports:
+      - "8501:8501"
+    depends_on:
+      - web
+    command: streamlit run streamlit_app/main.py --server.address 0.0.0.0
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=kishax_g
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  celery:
+    build: .
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/kishax_g
+      - REDIS_URL=redis://redis:6379
+    command: celery -A app.workers.celery worker --loglevel=info
+
+volumes:
+  postgres_data:
