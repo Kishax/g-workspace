@@ -95,7 +95,7 @@ kishax-g-python/
 
 ## 🚀 セットアップ手順
 
-### ⚡ 最速起動（Docker使用）
+### ⚡ 推奨起動方法（ハイブリッド構成）
 
 #### 1. リポジトリクローン
 ```bash
@@ -105,72 +105,71 @@ cd g-workspace
 
 #### 2. 環境変数設定
 ```bash
-# .env ファイルを作成
+# .env ファイルを作成（テンプレートから）
 cp .env.example .env
 
-# 最低限の設定で編集
-DATABASE_URL=postgresql://user:pass@db:5432/kishax_g
-REDIS_URL=redis://redis:6379
-JWT_SECRET_KEY=super_secret_key_for_development_only
-DEBUG=true
+# 必要に応じて .env を編集
+# 最低限の設定は既に含まれているのでそのまま使用可能
 ```
 
-#### 3. Docker起動
+#### 3. インフラ起動（Docker）
 ```bash
-docker-compose up -d
+# PostgreSQL + Redis のみ起動
+docker compose up db redis -d
 ```
 
-#### 4. アクセス
+#### 4. アプリケーション起動（ローカル）
+```bash
+# Python依存関係インストール
+pip install -r requirements.txt
+
+# FastAPI サーバー起動
+uvicorn app.main:app --reload
+
+# Streamlit 管理画面起動（別ターミナル）
+streamlit run streamlit_app/main.py
+
+# Flet デスクトップアプリ起動（別ターミナル）
+python flet_app/main.py
+```
+
+#### 5. アクセス
 - **FastAPI**: http://localhost:8000/docs
 - **Streamlit管理画面**: http://localhost:8501
+- **PostgreSQL**: localhost:5432
+- **Redis**: localhost:6379
 
-#### ⚠️ 注意点
-- `app/models/`でインポートエラーが発生する可能性があります
-- 一部のサービス（AWS、Discord、OpenAI）は環境変数なしだとエラーになります
-
-#### 🛠️ 問題が発生したら
-```bash
-# ログ確認
-docker-compose logs -f
-
-# 個別サービス確認
-docker-compose logs web
-docker-compose logs streamlit
-```
+#### 💡 この方法の利点
+- **安定性**: インフラはDocker、アプリはローカルで最適なパフォーマンス
+- **開発効率**: ホットリロード・デバッグが高速
+- **依存関係**: パッケージ競合やネットワーク問題を回避
 
 ### 💡 環境変数の詳細
 
-#### 🔧 **最低限必要（ローカル開発）**
+`.env.example`ファイルには設定項目が明確に分類されています：
+
+#### 🔧 **必須設定（最低限必要）**
 ```env
-# データベース（Docker使用時は不要）
 DATABASE_URL=postgresql://user:pass@localhost:5432/kishax_g
 REDIS_URL=redis://localhost:6379
-
-# JWT（必須・任意の長い文字列）
-JWT_SECRET_KEY=your_very_long_secret_key_here_12345
+JWT_SECRET_KEY=your_very_long_secret_key_here_please_change_this
+DEBUG=true
+ALLOWED_ORIGINS=["http://localhost:3000","http://localhost:8501"]
+ENABLE_METRICS=true
 ```
 
-#### 🌐 **外部サービス（オプション）**
+#### 🌐 **外部サービス設定（オプション）**
+これらの機能を使用する場合のみ、コメントアウトを外して設定：
 
-**Discord OAuth2（認証機能使用時のみ）**
-- Discord Developer Portal で作成が必要
-```env
-DISCORD_CLIENT_ID=your_discord_client_id
-DISCORD_CLIENT_SECRET=your_discord_client_secret
-```
+- **Discord OAuth2**: 認証機能用
+- **AWS S3**: ファイル管理機能用  
+- **Amazon SES**: メール送信機能用
+- **OpenAI API**: AI機能用
 
-**AWS（メール・ファイル機能使用時のみ）**
-- AWS アカウントが必要
-```env
-AWS_ACCESS_KEY_ID=your_aws_access_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-AWS_S3_BUCKET=your-s3-bucket
-```
-
-**OpenAI（AI機能使用時のみ）**
-```env
-OPENAI_API_KEY=your_openai_api_key
-```
+#### ⚙️ **設定のポイント**
+- **コピーするだけ**: `cp .env.example .env` で基本設定完了
+- **段階的拡張**: 必要な機能に応じて外部サービス設定を追加
+- **セキュリティ**: JWT_SECRET_KEYは必ず変更してください
 
 ### 🔧 詳細セットアップ（ローカル開発）
 

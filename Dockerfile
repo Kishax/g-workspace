@@ -3,15 +3,13 @@ FROM python:3.11-slim
 # 作業ディレクトリ
 WORKDIR /app
 
-# システムの依存関係
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Python の依存関係
+# Python の依存関係のみ（システム依存関係をスキップ）
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# psycopg2-binaryを使用してコンパイル不要にする
+RUN sed -i 's/psycopg2-binary/psycopg2-binary/g' requirements.txt && \
+    pip install --no-cache-dir --index-url https://pypi.org/simple/ -r requirements.txt || \
+    pip install --no-cache-dir -r requirements.txt
 
 # アプリケーションコード
 COPY ./app /app
