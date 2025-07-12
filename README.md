@@ -13,9 +13,9 @@ Google Workspace代替システムのフルスタックPython実装
 - FastAPI、Streamlit、Fletの3つのアプリケーション層
 
 ### 🛠️ **開発環境**
-- `docker-compose up` でフルスタック環境を一発起動
-- PostgreSQL + Redis + Celery の完全なバックエンド
-- 本格的なプロダクション構成
+- ハイブリッド構成：インフラ（Docker）+ アプリ（ローカル）
+- PostgreSQL + Redis の安定インフラ
+- ホットリロード対応の高速開発環境
 
 ### 🌐 **3つのフロントエンド**
 1. **FastAPI**: RESTful APIサーバー (ポート8000)
@@ -35,14 +35,19 @@ Google Workspace代替システムのフルスタックPython実装
 
 ### ⚡ **すぐに始められること**
 ```bash
-# 環境変数設定後
-docker-compose up -d
+# 1. 環境変数設定
+cp .env.example .env
 
-# または個別起動
+# 2. インフラ起動（Docker）
+docker compose up db redis -d
+
+# 3. 依存関係インストール
 pip install -r requirements.txt
-uvicorn app.main:app --reload
-streamlit run streamlit_app/main.py
-python flet_app/main.py
+
+# 4. アプリケーション起動
+uvicorn app.main:app --reload        # FastAPI
+streamlit run streamlit_app/main.py  # Streamlit  
+python flet_app/main.py             # Flet
 ```
 
 **次に実装するなら**: 認証機能、メール送信、ファイルアップロード等の具体的な機能実装ができます。
@@ -95,7 +100,7 @@ kishax-g-python/
 
 ## 🚀 セットアップ手順
 
-### ⚡ 推奨起動方法（ハイブリッド構成）
+### ⚡ 最速起動（推奨）
 
 #### 1. リポジトリクローン
 ```bash
@@ -114,7 +119,7 @@ cp .env.example .env
 
 #### 3. インフラ起動（Docker）
 ```bash
-# PostgreSQL + Redis のみ起動
+# PostgreSQL + Redis のみ起動（アプリはローカル実行）
 docker compose up db redis -d
 ```
 
@@ -139,10 +144,16 @@ python flet_app/main.py
 - **PostgreSQL**: localhost:5432
 - **Redis**: localhost:6379
 
-#### 💡 この方法の利点
+#### 💡 ハイブリッド構成の利点
 - **安定性**: インフラはDocker、アプリはローカルで最適なパフォーマンス
 - **開発効率**: ホットリロード・デバッグが高速
 - **依存関係**: パッケージ競合やネットワーク問題を回避
+- **簡単**: `docker compose up -d` だけではアプリは起動しません
+
+#### ❓ `docker compose up -d` だけを実行すると？
+- ✅ PostgreSQL（ポート5432）のみ起動
+- ✅ Redis（ポート6379）のみ起動  
+- ❌ アプリケーション（FastAPI/Streamlit/Flet）は起動しません
 
 ### 💡 環境変数の詳細
 
