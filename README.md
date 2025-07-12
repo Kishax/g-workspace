@@ -533,6 +533,168 @@ flet build web --release
 - `flet_app/ios/` - iOS固有設定
 - `flet_app/web/` - Web固有設定
 
+## 🚀 アプリストア配布
+
+### 📱 配布対応ストア
+
+| ストア | プラットフォーム | 手数料 | 審査期間 | 設定ファイル |
+|--------|----------------|--------|----------|-------------|
+| **Google Play** | Android | 30% | 1-3日 | `store-configs/google-play/` |
+| **App Store** | iOS/macOS | 30% | 1-2日 | `store-configs/app-store/` |
+| **Microsoft Store** | Windows | 30% | 1-3営業日 | `store-configs/microsoft-store/` |
+| **Snap Store** | Linux | 無料 | 即時 | `store-configs/snap-store/` |
+
+### 🎯 自動配布システム
+
+#### GitHub Actions による自動ビルド・配布
+
+```bash
+# リリースタグを作成して全プラットフォーム自動ビルド
+make create-tag VERSION=v1.0.0
+
+# 進行状況確認
+make release-status
+```
+
+**自動実行される処理:**
+1. **6プラットフォーム同時ビルド** (Linux, Web, Windows, macOS, Android, iOS)
+2. **GitHub Releases への自動アップロード**
+3. **配布用パッケージの作成**
+
+#### 手動リリース（現在の環境のみ）
+
+```bash
+# 現在の環境で可能なビルドを実行
+make release
+
+# 環境自動判定でパッケージ作成
+make package-current
+```
+
+### 📦 ストア別配布手順
+
+#### 🟢 Google Play Store (Android)
+```bash
+# 設定確認
+cat store-configs/google-play/README.md
+
+# 主な手順
+1. Google Play Console アカウント作成 ($25)
+2. 署名キー作成
+3. APKビルド: make build-android
+4. Play Console アップロード
+5. 審査・公開 (1-3日)
+```
+
+#### 🟣 Apple App Store (iOS/macOS)
+```bash
+# 設定確認
+cat store-configs/app-store/README.md
+
+# 主な手順 (macOS環境必須)
+1. Apple Developer Program 登録 ($99/年)
+2. 証明書・プロビジョニングプロファイル作成
+3. IPAビルド: make build-ios
+4. App Store Connect アップロード
+5. 審査・公開 (1-2日)
+```
+
+#### 🟦 Microsoft Store (Windows)
+```bash
+# 設定確認
+cat store-configs/microsoft-store/README.md
+
+# 主な手順 (Windows環境必須)
+1. Microsoft Partner Center 登録 ($19)
+2. MSIXパッケージ作成
+3. EXEビルド: make build-windows
+4. Partner Center アップロード
+5. 認定・公開 (1-3営業日)
+```
+
+#### 🟠 Snap Store (Linux)
+```bash
+# 設定確認
+cat store-configs/snap-store/README.md
+
+# 主な手順 (無料・即時)
+1. Snapcraft アカウント作成 (無料)
+2. snapcraft ツールインストール
+3. Snapパッケージビルド
+4. Snap Store アップロード
+5. 即時公開
+```
+
+### 🔄 継続的配布フロー
+
+#### 1. 開発 → テスト
+```bash
+# 機能開発
+make new-feature NAME=new-ui
+# 開発作業...
+make commit MSG="feat: 新UI機能を追加"
+
+# デバッグ・テスト
+make flet-debug    # ローカルテスト
+make flet-web      # 実機テスト
+```
+
+#### 2. ビルド → 検証
+```bash
+# ローカルビルドテスト
+make build-web     # 軽量ビルドで動作確認
+make build-linux   # 現在環境でのビルド確認
+```
+
+#### 3. リリース → 配布
+```bash
+# バージョンタグ作成 → 自動ビルド開始
+make create-tag VERSION=v1.0.0
+
+# GitHub Actions で全プラットフォーム自動ビルド
+# ↓
+# GitHub Releases に配布ファイル自動アップロード
+# ↓
+# 各ストアへ手動アップロード（将来的に自動化予定）
+```
+
+### 📊 配布状況の監視
+
+#### GitHub での確認
+```bash
+# リリース状況確認
+make release-status
+
+# 直接確認
+# Actions: https://github.com/Kishax/g-workspace/actions
+# Releases: https://github.com/Kishax/g-workspace/releases
+```
+
+#### ストア別Analytics
+- **Google Play Console**: インストール数、クラッシュ率
+- **App Store Connect**: ダウンロード数、レビュー  
+- **Microsoft Partner Center**: 使用状況、収益
+- **Snap Store**: アクティブユーザー、地域統計
+
+### 💡 配布戦略
+
+#### フェーズ1: オープンソース配布
+```bash
+# GitHub Releases で全プラットフォーム配布
+make create-tag VERSION=v1.0.0
+```
+
+#### フェーズ2: ストア展開
+1. **Snap Store** (無料・即時) → Linux ユーザー獲得
+2. **Google Play** (Android) → モバイルユーザー拡大
+3. **Microsoft Store** (Windows) → 企業ユーザー獲得
+4. **App Store** (iOS/macOS) → Apple エコシステム参入
+
+#### フェーズ3: エンタープライズ
+- カスタムビルド提供
+- オンプレミス展開サポート
+- 企業向けライセンスモデル
+
 ### 💡 環境変数の詳細
 
 `.env.example`ファイルには設定項目が明確に分類されています：
