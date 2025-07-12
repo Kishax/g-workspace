@@ -17,10 +17,25 @@ help:
 	@echo "cleanup      : マージ済みブランチの削除"
 	@echo "emergency    : developブランチをリモートから強制復元"
 	@echo ""
+	@echo "=== Fletデバッグコマンド ==="
+	@echo "flet-debug   : Fletアプリをデスクトップモードで起動"
+	@echo "flet-web     : Fletアプリをブラウザモードで起動（実機テスト可能）"
+	@echo "flet-simple  : シンプルなデバッグテスト"
+	@echo ""
+	@echo "=== Fletビルドコマンド ==="
+	@echo "build-android   : Android APKビルド"
+	@echo "build-ios       : iOS IPAビルド (macOSのみ)"
+	@echo "build-macos     : macOS APPビルド (macOSのみ)"
+	@echo "build-windows   : Windows EXEビルド (Windowsのみ)"
+	@echo "build-linux     : Linux AppImageビルド"
+	@echo "build-web       : Web PWAビルド"
+	@echo "build-check     : ビルド環境チェック"
+	@echo ""
 	@echo "=== 使用例 ==="
 	@echo "make new-feature NAME=user-login"
 	@echo "make commit MSG=\"feat: ユーザーログイン機能を追加\""
 	@echo "make new-fix NAME=issue-123"
+	@echo "make flet-web  # 実機でhttp://localhost:8080にアクセス"
 
 # 初期設定
 setup:
@@ -175,6 +190,68 @@ fetch:
 	@echo "📡 リモートブランチ情報を更新中..."
 	git fetch --all --prune
 	@echo "✅ リモート情報を更新しました"
+
+# Fletデバッグ関連コマンド
+flet-debug:
+	@echo "🐛 Fletアプリをデスクトップモードでデバッグ起動中..."
+	python flet_app/main.py
+
+flet-web:
+	@echo "🌐 Fletアプリをブラウザモードでデバッグ起動中..."
+	@echo "📱 実機テスト: http://localhost:8080 にアクセス"
+	python -c "import flet as ft; from flet_app.main import main; ft.app(target=main, view=ft.WEB_BROWSER, port=8080)"
+
+flet-simple:
+	@echo "🔍 Fletシンプルデバッグテスト起動中..."
+	@echo "📱 実機テスト: http://localhost:8080 にアクセス"
+	python flet_debug_simple.py
+
+# Fletクロスプラットフォームビルドコマンド
+build-android:
+	@echo "📱 Android APKをビルド中..."
+	@echo "📋 要件: Android Studio, Android SDK"
+	cd flet_app && flet build apk --verbose
+
+build-ios:
+	@echo "📱 iOS IPAをビルド中..."
+	@echo "📋 要件: macOS, Xcode"
+	cd flet_app && flet build ipa --verbose
+
+build-macos:
+	@echo "🖥️ macOS APPをビルド中..."
+	@echo "📋 要件: macOS"
+	cd flet_app && flet build macos --verbose
+
+build-windows:
+	@echo "🖥️ Windows EXEをビルド中..."
+	@echo "📋 要件: Windows"
+	cd flet_app && flet build windows --verbose
+
+build-linux:
+	@echo "🐧 Linux AppImageをビルド中..."
+	cd flet_app && flet build linux --verbose
+
+build-web:
+	@echo "🌐 Web PWAをビルド中..."
+	cd flet_app && flet build web --verbose
+
+# 全プラットフォーム対応状況確認
+build-check:
+	@echo "🔍 ビルド環境チェック中..."
+	@echo ""
+	@echo "=== Fletインストール状況 ==="
+	@flet --version || echo "❌ Fletがインストールされていません: pip install flet"
+	@echo ""
+	@echo "=== プラットフォーム別要件 ==="
+	@echo "📱 Android: Android Studio + Android SDK"
+	@echo "📱 iOS: macOS + Xcode (macOSのみ)"
+	@echo "🖥️ macOS: macOS環境"
+	@echo "🖥️ Windows: Windows環境"
+	@echo "🐧 Linux: 現在の環境で利用可能"
+	@echo "🌐 Web: 全環境で利用可能"
+	@echo ""
+	@echo "📋 現在の環境:"
+	@uname -s
 
 # 開発フロー確認
 workflow:

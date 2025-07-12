@@ -195,6 +195,344 @@ docker compose up db redis -d
 docker compose ps
 ```
 
+## 🐛 Fletアプリのデバッグ方法
+
+### 🎯 デバッグモード別の特徴
+
+| モード | 用途 | 実機テスト | コマンド |
+|--------|------|------------|----------|
+| **デスクトップ** | PC開発・デバッグ | ❌ | `make flet-debug` |
+| **ブラウザ** | 実機テスト・共有 | ✅ | `make flet-web` |
+| **シンプル** | 動作確認・学習 | ✅ | `make flet-simple` |
+
+### 🖥️ デスクトップモードでのデバッグ
+
+PCでの高速開発・デバッグに最適：
+
+```bash
+# メインアプリをデスクトップで起動
+make flet-debug
+
+# または直接実行
+python flet_app/main.py
+```
+
+**特徴:**
+- ✅ 高速起動・レスポンス
+- ✅ デバッグ出力がターミナルに表示
+- ✅ ホットリロード（コード変更時の再起動）
+- ❌ 実機での確認はできない
+
+### 🌐 ブラウザモード（実機テスト）
+
+スマホ・タブレットでの実機テストに最適：
+
+```bash
+# メインアプリをブラウザモードで起動
+make flet-web
+
+# または直接実行（WSL2環境）
+python -c "import flet as ft; from flet_app.main import main; ft.app(target=main, view=ft.WEB_BROWSER, port=8080)"
+```
+
+**アクセス方法:**
+1. **PC**: http://localhost:8080
+2. **実機**: http://[PCのIPアドレス]:8080
+
+**実機でのアクセス手順:**
+```bash
+# 1. PCのIPアドレスを確認
+ip addr show eth0 | grep inet  # WSL2の場合
+
+# 2. スマホ・タブレットでアクセス
+# 例: http://192.168.1.100:8080
+```
+
+**特徴:**
+- ✅ 実機での動作確認
+- ✅ タッチ操作・レスポンシブデザインのテスト
+- ✅ チーム共有が簡単
+- ❌ デスクトップより若干重い
+
+### 🔍 シンプルデバッグテスト
+
+動作確認・学習用の軽量テストアプリ：
+
+```bash
+# シンプルなテストアプリを起動
+make flet-simple
+
+# または直接実行
+python flet_debug_simple.py
+```
+
+**特徴:**
+- ✅ 最小構成でのテスト
+- ✅ Fletの基本動作確認
+- ✅ デバッグ出力の確認
+- ✅ 実機テスト可能（ブラウザモード）
+
+### 🛠️ トラブルシューティング
+
+#### WSL2でGUIエラーが出る場合
+
+デスクトップモードで以下のようなエラーが出る場合：
+
+```
+qt.qpa.plugin: Could not find the Qt platform plugin "wayland"
+```
+
+**対処法**: ブラウザモードを使用
+```bash
+# GUIエラーを回避してブラウザで確認
+make flet-web
+```
+
+#### ポート競合エラーの場合
+
+```bash
+# ポート使用状況を確認
+lsof -i :8080
+
+# プロセスを終了
+kill -9 [PID]
+
+# または別ポートを使用
+python -c "import flet as ft; from flet_app.main import main; ft.app(target=main, view=ft.WEB_BROWSER, port=8081)"
+```
+
+#### 実機からアクセスできない場合
+
+1. **ファイアウォール確認**:
+   ```bash
+   # Windows側でポート8080を開放
+   # Windows設定 > ネットワークとインターネット > Windows Defender ファイアウォール
+   ```
+
+2. **WSL2ネットワーク確認**:
+   ```bash
+   # WSL2のIPアドレス確認
+   hostname -I
+   ```
+
+3. **同じWi-Fiネットワークに接続確認**
+
+### 📱 実機テストのベストプラクティス
+
+#### 開発フロー
+```bash
+# 1. デスクトップで高速開発
+make flet-debug
+# コード編集・デバッグ
+
+# 2. 実機で動作確認
+make flet-web
+# スマホでhttp://[IP]:8080にアクセス
+
+# 3. 問題があればデスクトップに戻る
+```
+
+#### 実機テスト項目
+- ✅ タッチ操作の反応性
+- ✅ 画面サイズ・レスポンシブ対応
+- ✅ スクロール動作
+- ✅ 文字サイズ・読みやすさ
+- ✅ ネットワーク処理（ローディング等）
+
+## 📦 クロスプラットフォームビルド
+
+Fletアプリを各プラットフォーム用のネイティブアプリとしてビルドできます。
+
+### 🎯 対応プラットフォーム
+
+| プラットフォーム | 出力形式 | 配布方法 | ビルド環境 | コマンド |
+|----------------|----------|----------|-----------|----------|
+| **Android** | `.apk` | Google Play / サイドロード | Android Studio + SDK | `make build-android` |
+| **iOS** | `.ipa` | App Store / TestFlight | macOS + Xcode | `make build-ios` |
+| **macOS** | `.app` / `.dmg` | App Store / 直接配布 | macOS | `make build-macos` |
+| **Windows** | `.exe` | Microsoft Store / 直接配布 | Windows | `make build-windows` |
+| **Linux** | `AppImage` | 直接配布 | Linux | `make build-linux` |
+| **Web** | `PWA` | Webホスティング | 全環境 | `make build-web` |
+
+### 🔍 ビルド環境チェック
+
+現在の環境でビルド可能なプラットフォームを確認：
+
+```bash
+# ビルド環境をチェック
+make build-check
+```
+
+### 🛠️ 環境別セットアップ
+
+#### Android開発環境
+
+```bash
+# 1. Android Studioをインストール
+# https://developer.android.com/studio
+
+# 2. Android SDKの設定
+# Android Studio > SDK Manager > Android SDK
+
+# 3. 環境変数設定
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
+
+# 4. APKビルド
+make build-android
+```
+
+**出力**: `flet_app/build/apk/`
+
+#### iOS開発環境（macOSのみ）
+
+```bash
+# 1. Xcodeをインストール
+# App Storeからインストール
+
+# 2. Xcode Command Line Toolsをインストール
+xcode-select --install
+
+# 3. IPAビルド
+make build-ios
+```
+
+**出力**: `flet_app/build/ipa/`
+
+#### Web PWA
+
+```bash
+# 全環境で利用可能
+make build-web
+```
+
+**出力**: `flet_app/build/web/`
+
+**配布方法:**
+- Netlify, Vercel等にデプロイ
+- PWAとしてホーム画面追加可能
+
+### 🚀 ビルド例
+
+#### 1. Android APK作成
+```bash
+# APKビルド（デバッグ版）
+make build-android
+
+# リリース版（署名が必要）
+cd flet_app
+flet build apk --release
+```
+
+#### 2. Web PWA作成
+```bash
+# PWAビルド
+make build-web
+
+# ローカルでプレビュー
+cd flet_app/build/web
+python -m http.server 8080
+# http://localhost:8080 でアクセス
+```
+
+#### 3. 複数プラットフォーム同時ビルド
+```bash
+# 現在の環境で利用可能な全プラットフォーム
+make build-linux build-web
+
+# macOSの場合
+make build-macos build-ios build-web
+```
+
+### 📱 アプリストア配布
+
+#### Google Play Store（Android）
+
+1. **開発者アカウント作成**
+   - Google Play Console登録（$25）
+
+2. **リリース版APK作成**
+   ```bash
+   cd flet_app
+   flet build apk --release
+   ```
+
+3. **アプリ署名・アップロード**
+   - Play Console > アプリ作成 > APKアップロード
+
+#### Apple App Store（iOS）
+
+1. **開発者アカウント作成**
+   - Apple Developer Program登録（$99/年）
+
+2. **リリース版IPA作成**
+   ```bash
+   cd flet_app
+   flet build ipa --release
+   ```
+
+3. **App Store Connect**
+   - Xcode > Archive > Distribute App
+
+### 🛠️ トラブルシューティング
+
+#### Androidビルドエラー
+
+```bash
+# SDKパスエラーの場合
+echo $ANDROID_HOME  # 設定確認
+
+# Gradle権限エラーの場合
+cd flet_app
+chmod +x gradlew
+```
+
+#### iOSビルドエラー
+
+```bash
+# Xcodeライセンス確認
+sudo xcodebuild -license accept
+
+# 証明書エラーの場合
+# Xcode > Preferences > Accounts > Sign In
+```
+
+#### 一般的なビルドエラー
+
+```bash
+# Fletキャッシュクリア
+cd flet_app
+rm -rf build/
+flet build [platform] --verbose
+```
+
+### 💡 ビルド最適化
+
+#### APKサイズ削減
+
+```bash
+# ProGuard有効化（ビルド設定）
+cd flet_app
+flet build apk --release --obfuscate
+```
+
+#### PWA最適化
+
+```bash
+# 圧縮ビルド
+cd flet_app
+flet build web --release
+```
+
+### 🔧 ビルド設定ファイル
+
+主要な設定ファイルがプロジェクトに自動生成されます：
+
+- `flet_app/pubspec.yaml` - Flutter/Dart依存関係
+- `flet_app/android/` - Android固有設定
+- `flet_app/ios/` - iOS固有設定
+- `flet_app/web/` - Web固有設定
+
 ### 💡 環境変数の詳細
 
 `.env.example`ファイルには設定項目が明確に分類されています：
