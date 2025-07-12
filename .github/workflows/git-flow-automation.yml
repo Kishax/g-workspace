@@ -165,23 +165,6 @@ jobs:
           echo "merged_branch=$branch_name" >> $GITHUB_OUTPUT
           echo "✅ 最終的なブランチ名: $branch_name"
 
-      - name: PR作成通知
-        if: false  # この通知は無効化（develop pushではPR情報が取得できないため）
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          channel: "#development"
-          text: |
-            📝 *新しいPRが作成されました*
-
-            *タイトル*: ${{ github.event.pull_request.title }}
-            *作成者*: ${{ github.actor }}
-            *ブランチ*: `${{ github.head_ref }}` → `develop`
-            *リンク*: ${{ github.event.pull_request.html_url }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-
   # 3. mainブランチ更新時（リリース時）の自動処理
   main-released:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
