@@ -115,31 +115,6 @@ jobs:
               body: comment
             });
 
-      - name: PR作成時のSlack通知
-        if: github.event.action == 'opened'
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          channel: "#development"
-          username: "Git-Flow Bot"
-          icon_emoji: ":robot_face:"
-          text: |
-            🆕 *新しいPRが作成されました*
-
-            *📋 PR情報:*
-            • *タイトル*: ${{ github.event.pull_request.title }}
-            • *作成者*: ${{ github.actor }}
-            • *ブランチ*: `${{ github.head_ref }}` → `${{ github.base_ref }}`
-            • *リンク*: ${{ github.event.pull_request.html_url }}
-
-            *🔍 自動チェック結果:*
-            • ✅ ブランチ名規約チェック完了
-            • ✅ コミットメッセージ規約チェック完了
-
-            *📝 次のステップ:* コードレビューをお願いします
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
   # 2. developブランチ更新後の自動処理
   develop-updated:
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
