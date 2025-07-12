@@ -14,7 +14,7 @@ jobs:
   notify-slack:
     runs-on: ubuntu-latest
     name: "Slack PR通知"
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,11 +32,11 @@ jobs:
           echo "source_branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
           echo "target_branch=${{ github.base_ref }}" >> $GITHUB_OUTPUT
           echo "action=${{ github.event.action }}" >> $GITHUB_OUTPUT
-          
+
           # 変更ファイル数を取得
           changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | wc -l)
           echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
-          
+
           # アクションに応じたアイコンとメッセージ
           case "${{ github.event.action }}" in
             "opened")
@@ -71,15 +71,15 @@ jobs:
           username: "GitHub PR Bot"
           icon_emoji: ":octocat:"
           text: |
-            ${{ steps.pr-info.outputs.action_icon }} **${{ steps.pr-info.outputs.action_text }}**
-            
-            **📋 PR情報:**
-            • **タイトル**: ${{ steps.pr-info.outputs.pr_title }}
-            • **作成者**: ${{ steps.pr-info.outputs.pr_author }}
-            • **ブランチ**: `${{ steps.pr-info.outputs.source_branch }}` → `${{ steps.pr-info.outputs.target_branch }}`
-            • **変更ファイル**: ${{ steps.pr-info.outputs.changed_files }}件
-            
-            **🔗 リンク**: ${{ steps.pr-info.outputs.pr_url }}
+            ${{ steps.pr-info.outputs.action_icon }} *${{ steps.pr-info.outputs.action_text }}*
+
+            *📋 PR情報:*
+            • *タイトル*: ${{ steps.pr-info.outputs.pr_title }}
+            • *作成者*: ${{ steps.pr-info.outputs.pr_author }}
+            • *ブランチ*: `${{ steps.pr-info.outputs.source_branch }}` → `${{ steps.pr-info.outputs.target_branch }}`
+            • *変更ファイル*: ${{ steps.pr-info.outputs.changed_files }}件
+
+            *🔗 リンク*: ${{ steps.pr-info.outputs.pr_url }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -91,12 +91,12 @@ jobs:
             const comment = `
             ## 🤖 PR作成通知
 
-            ${{ steps.pr-info.outputs.action_icon }} **${{ steps.pr-info.outputs.action_text }}**
+            ${{ steps.pr-info.outputs.action_icon }} *${{ steps.pr-info.outputs.action_text }}*
 
-            **ℹ️ 注意**: Slack通知の設定が完了していません。
+            *ℹ️ 注意*: Slack通知の設定が完了していません。
             リポジトリの設定で \`SLACK_WEBHOOK_URL\` シークレットを追加してください。
 
-            **📊 PR統計:**
+            *📊 PR統計:*
             - 変更ファイル数: ${{ steps.pr-info.outputs.changed_files }}
             - 作成者: ${{ steps.pr-info.outputs.pr_author }}
             - ソースブランチ: \`${{ steps.pr-info.outputs.source_branch }}\`
@@ -122,7 +122,7 @@ jobs:
             echo "⚠️ Slack通知: SLACK_WEBHOOK_URL が設定されていません"
             echo "💡 GitHub リポジトリの Settings > Secrets and variables > Actions で設定してください"
           fi
-          
+
           echo ""
           echo "🔍 PR詳細:"
           echo "- アクション: ${{ steps.pr-info.outputs.action }}"
@@ -131,3 +131,4 @@ jobs:
           echo "- 作成者: ${{ steps.pr-info.outputs.pr_author }}"
           echo "- ブランチ: ${{ steps.pr-info.outputs.source_branch }} → ${{ steps.pr-info.outputs.target_branch }}"
           echo "- 変更ファイル: ${{ steps.pr-info.outputs.changed_files }}件"
+

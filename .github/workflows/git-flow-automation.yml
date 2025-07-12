@@ -90,15 +90,15 @@ jobs:
             const comment = `
             ## 🤖 自動PR分析レポート
 
-            **📊 変更統計:**
+            *📊 変更統計:*
             - 変更ファイル数: ${files.length}
             - 追加行数: ${pr.additions}
             - 削除行数: ${pr.deletions}
 
-            **📁 変更ファイル:**
+            *📁 変更ファイル:*
             ${files.map(file => `- \`${file.filename}\` (+${file.additions}/-${file.deletions})`).join('\n')}
 
-            **✅ チェック項目:**
+            *✅ チェック項目:*
             - [x] ブランチ名がGit-Flow規約に準拠
             - [x] コミットメッセージが規約に準拠
             - [ ] 動作確認済み（手動確認してください）
@@ -124,19 +124,19 @@ jobs:
           username: "Git-Flow Bot"
           icon_emoji: ":robot_face:"
           text: |
-            🆕 **新しいPRが作成されました**
-            
-            **📋 PR情報:**
-            • **タイトル**: ${{ github.event.pull_request.title }}
-            • **作成者**: ${{ github.actor }}
-            • **ブランチ**: `${{ github.head_ref }}` → `${{ github.base_ref }}`
-            • **リンク**: ${{ github.event.pull_request.html_url }}
-            
-            **🔍 自動チェック結果:**
+            🆕 *新しいPRが作成されました*
+
+            *📋 PR情報:*
+            • *タイトル*: ${{ github.event.pull_request.title }}
+            • *作成者*: ${{ github.actor }}
+            • *ブランチ*: `${{ github.head_ref }}` → `${{ github.base_ref }}`
+            • *リンク*: ${{ github.event.pull_request.html_url }}
+
+            *🔍 自動チェック結果:*
             • ✅ ブランチ名規約チェック完了
             • ✅ コミットメッセージ規約チェック完了
-            
-            **📝 次のステップ:** コードレビューをお願いします
+
+            *📝 次のステップ:* コードレビューをお願いします
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -171,10 +171,10 @@ jobs:
           text: |
             📝 *新しいPRが作成されました*
 
-            **タイトル**: ${{ github.event.pull_request.title }}
-            **作成者**: ${{ github.actor }}
-            **ブランチ**: `${{ github.head_ref }}` → `develop`
-            **リンク**: ${{ github.event.pull_request.html_url }}
+            *タイトル*: ${{ github.event.pull_request.title }}
+            *作成者*: ${{ github.actor }}
+            *ブランチ*: `${{ github.head_ref }}` → `develop`
+            *リンク*: ${{ github.event.pull_request.html_url }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -187,10 +187,10 @@ jobs:
           text: |
             ❌ *ワークフローでエラーが発生しました*
 
-            **リポジトリ**: ${{ github.repository }}
-            **ブランチ**: ${{ github.ref }}
-            **実行者**: ${{ github.actor }}
-            **エラー詳細**: GitHub Actionsのログを確認してください
+            *リポジトリ*: ${{ github.repository }}
+            *ブランチ*: ${{ github.ref }}
+            *実行者*: ${{ github.actor }}
+            *エラー詳細*: GitHub Actionsのログを確認してください
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -202,13 +202,13 @@ jobs:
           username: "Git-Flow Bot"
           icon_emoji: ":robot_face:"
           text: |
-            🚀 **開発進捗通知**
+            🚀 *開発進捗通知*
 
-            ✅ **ステータス**: PRマージ完了
-            📂 **プロジェクト**: ${{ github.repository }}
-            🌿 **ブランチ**: `${{ steps.merged-info.outputs.merged_branch }}` → `develop`
-            👤 **担当者**: ${{ github.actor }}
-            📅 **時刻**: $(date +'%Y-%m-%d %H:%M:%S')
+            ✅ *ステータス*: PRマージ完了
+            📂 *プロジェクト*: ${{ github.repository }}
+            🌿 *ブランチ*: `${{ steps.merged-info.outputs.merged_branch }}` → `develop`
+            👤 *担当者*: ${{ github.actor }}
+            📅 *時刻*: $(date +'%Y-%m-%d %H:%M:%S')
 
             次のステップ: ローカルで `make sync` を実行してください
         env:
@@ -275,16 +275,16 @@ jobs:
               const releaseNotes = `
               ## 🚀 Release ${latestTag}
 
-              **📈 変更統計:**
+              *📈 変更統計:*
               - Total commits: ${comparison.total_commits}
               - Files changed: ${comparison.files.length}
 
-              **📝 変更内容:**
+              *📝 変更内容:*
               ${comparison.commits.map(commit => 
                 `- ${commit.commit.message.split('\n')[0]} (${commit.sha.substring(0, 7)})`
               ).join('\n')}
 
-              **🔗 Full Changelog:** https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${previousTag}...${latestTag}
+              *🔗 Full Changelog:* https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${previousTag}...${latestTag}
               `;
 
               await github.rest.repos.createRelease({
