@@ -64,14 +64,14 @@ jobs:
           esac
 
       - name: Slack通知（Webhook）
-        if: env.SLACK_WEBHOOK_URL != ''
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          channel: "#development"
-          username: "GitHub PR Bot"
-          icon_emoji: ":github:"
-          text: |
+        if: env.SLACK_WEBHOOK != ''
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: "#011_github-notification"
+          SLACK_USERNAME: "GitHub PR Bot"
+          SLACK_ICON_EMOJI: ":github:"
+          SLACK_MESSAGE: |
             ${{ steps.pr-info.outputs.action_icon }} *${{ steps.pr-info.outputs.action_text }}*
 
             *📋 PR情報:*
@@ -81,11 +81,9 @@ jobs:
             • *変更ファイル*: ${{ steps.pr-info.outputs.changed_files }}件
 
             *🔗 リンク*: ${{ steps.pr-info.outputs.pr_url }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: フォールバック通知（GitHub コメント）
-        if: env.SLACK_WEBHOOK_URL == '' && github.event.action == 'opened'
+        if: env.SLACK_WEBHOOK == '' && github.event.action == 'opened'
         uses: actions/github-script@v7
         continue-on-error: true
         with:
