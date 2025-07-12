@@ -70,7 +70,7 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_CHANNEL: "#011_github-notification"
           SLACK_USERNAME: "GitHub PR Bot"
-          SLACK_ICON: "https://github.com/github.png"
+          SLACK_ICON_URL: "https://github.com/github.png"
           SLACK_MESSAGE: |
             ${{ steps.pr-info.outputs.action_icon }} *${{ steps.pr-info.outputs.action_text }}*
 
@@ -113,7 +113,7 @@ jobs:
                 repo: context.repo.repo,
                 body: comment
               });
-              
+
               console.log('✅ GitHubコメント通知を作成しました');
             } catch (error) {
               console.log('⚠️ GitHubコメント作成に失敗しました:', error.message);
@@ -139,10 +139,9 @@ jobs:
           echo "- 作成者: ${{ steps.pr-info.outputs.pr_author }}"
           echo "- ブランチ: ${{ steps.pr-info.outputs.source_branch }} → ${{ steps.pr-info.outputs.target_branch }}"
           echo "- 変更ファイル: ${{ steps.pr-info.outputs.changed_files }}件"
-          
+
           echo ""
           echo "🔧 権限確認:"
           echo "- contents: read ✅"
           echo "- pull-requests: write ✅" 
           echo "- issues: write ✅"
-
