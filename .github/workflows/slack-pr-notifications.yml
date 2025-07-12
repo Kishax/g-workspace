@@ -70,7 +70,7 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_CHANNEL: "#011_github-notification"
           SLACK_USERNAME: "GitHub PR Bot"
-          SLACK_ICON_EMOJI: ":github:"
+          SLACK_ICON: "https://github.com/github.png"
           SLACK_MESSAGE: |
             ${{ steps.pr-info.outputs.action_icon }} *${{ steps.pr-info.outputs.action_text }}*
 
