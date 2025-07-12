@@ -203,6 +203,12 @@ fetch:
 	git fetch --all --prune
 	@echo "✅ リモート情報を更新しました"
 
+# streamlit 管理画面起動
+stream-web:
+	@echo "📊 Streamlit 管理画面を起動中..."
+	@echo "🌐 ブラウザで http://localhost:8501 にアクセス"
+	streamlit run streamlit_app/main.py
+
 # Fletデバッグ関連コマンド
 flet-debug:
 	@echo "🐛 Fletアプリをデスクトップモードでデバッグ起動中..."
