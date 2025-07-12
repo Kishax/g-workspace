@@ -95,7 +95,86 @@ kishax-g-python/
 
 ## 🚀 セットアップ手順
 
-### 1. リポジトリクローン
+### ⚡ 最速起動（Docker使用）
+
+#### 1. リポジトリクローン
+```bash
+git clone https://github.com/Kishax/g-workspace.git
+cd g-workspace
+```
+
+#### 2. 環境変数設定
+```bash
+# .env ファイルを作成
+cp .env.example .env
+
+# 最低限の設定で編集
+DATABASE_URL=postgresql://user:pass@db:5432/kishax_g
+REDIS_URL=redis://redis:6379
+JWT_SECRET_KEY=super_secret_key_for_development_only
+DEBUG=true
+```
+
+#### 3. Docker起動
+```bash
+docker-compose up -d
+```
+
+#### 4. アクセス
+- **FastAPI**: http://localhost:8000/docs
+- **Streamlit管理画面**: http://localhost:8501
+
+#### ⚠️ 注意点
+- `app/models/`でインポートエラーが発生する可能性があります
+- 一部のサービス（AWS、Discord、OpenAI）は環境変数なしだとエラーになります
+
+#### 🛠️ 問題が発生したら
+```bash
+# ログ確認
+docker-compose logs -f
+
+# 個別サービス確認
+docker-compose logs web
+docker-compose logs streamlit
+```
+
+### 💡 環境変数の詳細
+
+#### 🔧 **最低限必要（ローカル開発）**
+```env
+# データベース（Docker使用時は不要）
+DATABASE_URL=postgresql://user:pass@localhost:5432/kishax_g
+REDIS_URL=redis://localhost:6379
+
+# JWT（必須・任意の長い文字列）
+JWT_SECRET_KEY=your_very_long_secret_key_here_12345
+```
+
+#### 🌐 **外部サービス（オプション）**
+
+**Discord OAuth2（認証機能使用時のみ）**
+- Discord Developer Portal で作成が必要
+```env
+DISCORD_CLIENT_ID=your_discord_client_id
+DISCORD_CLIENT_SECRET=your_discord_client_secret
+```
+
+**AWS（メール・ファイル機能使用時のみ）**
+- AWS アカウントが必要
+```env
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_S3_BUCKET=your-s3-bucket
+```
+
+**OpenAI（AI機能使用時のみ）**
+```env
+OPENAI_API_KEY=your_openai_api_key
+```
+
+### 🔧 詳細セットアップ（ローカル開発）
+
+#### 1. リポジトリクローン
 
 ```bash
 git clone https://github.com/Kishax/g-workspace.git
