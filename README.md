@@ -729,6 +729,44 @@ make create-tag VERSION=v1.0.0
 - オンプレミス展開サポート
 - 企業向けライセンスモデル
 
+## 📢 Slack通知設定
+
+### 🔧 PR作成時のSlack通知
+新しいワークフローにより、PR作成・更新時に自動でSlack通知を送信します。
+
+```bash
+# 通知対象イベント
+- PR作成 (opened)
+- PR更新 (synchronize) 
+- PR再オープン (reopened)
+- PRマージ/クローズ (closed)
+```
+
+### ⚙️ 設定手順
+
+#### 1. Slack Webhook URL取得
+1. https://api.slack.com/apps にアクセス
+2. 「Create New App」→「From scratch」
+3. App名とワークスペースを設定
+4. 「Incoming Webhooks」を有効化
+5. 「Add New Webhook to Workspace」でチャンネル選択
+6. 生成されたWebhook URLをコピー
+
+#### 2. GitHub シークレット設定
+1. GitHubリポジトリ > Settings > Secrets and variables > Actions
+2. 「New repository secret」
+3. Name: `SLACK_WEBHOOK_URL`
+4. Secret: 上記で取得したWebhook URL
+
+### 📱 通知内容
+- **基本情報**: PR タイトル、作成者、ブランチ
+- **統計**: 変更ファイル数、追加/削除行数
+- **リンク**: PR の直接リンク
+- **自動チェック結果**: ブランチ名・コミットメッセージ規約
+
+### 🛠️ フォールバック機能
+Slack設定が未完了の場合、GitHub PR コメントで通知されます。
+
 ### 💡 環境変数の詳細
 
 `.env.example`ファイルには設定項目が明確に分類されています：
