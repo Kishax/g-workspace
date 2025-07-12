@@ -70,7 +70,7 @@ jobs:
           status: success
           channel: "#development"
           username: "GitHub PR Bot"
-          icon_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          icon_url: "https://github.com/github.png"
           text: |
             ${{ steps.pr-info.outputs.action_icon }} *${{ steps.pr-info.outputs.action_text }}*
 

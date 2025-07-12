@@ -203,7 +203,7 @@ jobs:
           status: success
           channel: "#development"
           username: "Git-Flow Bot"
-          icon_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          icon_url: "https://github.com/github.png"
           text: |
             🚀 *開発進捗通知*
 
