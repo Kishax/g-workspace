@@ -5,10 +5,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 
-# 必要最小限の権限
+# 必要な権限を明示的に設定
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write
+  issues: write
 
 jobs:
   notify-slack:
@@ -86,32 +87,40 @@ jobs:
       - name: フォールバック通知（GitHub コメント）
         if: env.SLACK_WEBHOOK_URL == '' && github.event.action == 'opened'
         uses: actions/github-script@v7
+        continue-on-error: true
         with:
           script: |
-            const comment = `
-            ## 🤖 PR作成通知
+            try {
+              const comment = `
+              ## 🤖 PR作成通知
 
-            ${{ steps.pr-info.outputs.action_icon }} *${{ steps.pr-info.outputs.action_text }}*
+              ${{ steps.pr-info.outputs.action_icon }} **${{ steps.pr-info.outputs.action_text }}**
 
-            *ℹ️ 注意*: Slack通知の設定が完了していません。
-            リポジトリの設定で \`SLACK_WEBHOOK_URL\` シークレットを追加してください。
+              **ℹ️ 注意**: Slack通知の設定が完了していません。
+              リポジトリの設定で \`SLACK_WEBHOOK_URL\` シークレットを追加してください。
 
-            *📊 PR統計:*
-            - 変更ファイル数: ${{ steps.pr-info.outputs.changed_files }}
-            - 作成者: ${{ steps.pr-info.outputs.pr_author }}
-            - ソースブランチ: \`${{ steps.pr-info.outputs.source_branch }}\`
-            - ターゲットブランチ: \`${{ steps.pr-info.outputs.target_branch }}\`
+              **📊 PR統計:**
+              - 変更ファイル数: ${{ steps.pr-info.outputs.changed_files }}
+              - 作成者: ${{ steps.pr-info.outputs.pr_author }}
+              - ソースブランチ: \`${{ steps.pr-info.outputs.source_branch }}\`
+              - ターゲットブランチ: \`${{ steps.pr-info.outputs.target_branch }}\`
 
-            ---
-            *この通知は自動生成されました。Slack連携が有効になると、このコメントは表示されなくなります。*
-            `;
+              ---
+              *この通知は自動生成されました。Slack連携が有効になると、このコメントは表示されなくなります。*
+              `;
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+              
+              console.log('✅ GitHubコメント通知を作成しました');
+            } catch (error) {
+              console.log('⚠️ GitHubコメント作成に失敗しました:', error.message);
+              console.log('💡 Slack Webhook URLを設定してSlack通知をご利用ください');
+            }
 
       - name: 通知状況の確認
         run: |
@@ -121,6 +130,7 @@ jobs:
           else
             echo "⚠️ Slack通知: SLACK_WEBHOOK_URL が設定されていません"
             echo "💡 GitHub リポジトリの Settings > Secrets and variables > Actions で設定してください"
+            echo "📝 フォールバック: GitHubコメント通知を試行しました"
           fi
 
           echo ""
@@ -131,4 +141,10 @@ jobs:
           echo "- 作成者: ${{ steps.pr-info.outputs.pr_author }}"
           echo "- ブランチ: ${{ steps.pr-info.outputs.source_branch }} → ${{ steps.pr-info.outputs.target_branch }}"
           echo "- 変更ファイル: ${{ steps.pr-info.outputs.changed_files }}件"
+          
+          echo ""
+          echo "🔧 権限確認:"
+          echo "- contents: read ✅"
+          echo "- pull-requests: write ✅" 
+          echo "- issues: write ✅"
 
