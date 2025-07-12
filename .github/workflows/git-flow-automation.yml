@@ -42,9 +42,9 @@ jobs:
           branch_name="${{ github.head_ref }}"
           echo "🔍 ブランチ名チェック: $branch_name"
 
-          if [[ ! $branch_name =~ ^(feature|fix|hotfix)/.+ ]]; then
+          if [[ ! $branch_name =~ ^(feature|fix|hotfix|test)/.+ ]]; then
             echo "❌ ブランチ名が Git-Flow 規約に従っていません"
-            echo "正しい形式: feature/xxx, fix/xxx, hotfix/xxx"
+            echo "正しい形式: feature/xxx, fix/xxx, hotfix/xxx, test/xxx"
             exit 1
           fi
 
