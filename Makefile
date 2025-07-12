@@ -216,30 +216,32 @@ flet-simple:
 build-android:
 	@echo "📱 Android APKをビルド中..."
 	@echo "📋 要件: Android Studio, Android SDK"
-	cd flet_app && flet build apk --verbose
+	@echo "❌ 現在のFletバージョンではサポートされていません"
+	@echo "代替案: flet publish でWebアプリとして配布"
 
 build-ios:
 	@echo "📱 iOS IPAをビルド中..."
 	@echo "📋 要件: macOS, Xcode"
-	cd flet_app && flet build ipa --verbose
+	@echo "❌ 現在のFletバージョンではサポートされていません"
+	@echo "代替案: flet publish でWebアプリとして配布"
 
 build-macos:
 	@echo "🖥️ macOS APPをビルド中..."
 	@echo "📋 要件: macOS"
-	cd flet_app && flet build macos --verbose
+	cd flet_app && flet pack main.py --name "Kishax-G" --verbose
 
 build-windows:
 	@echo "🖥️ Windows EXEをビルド中..."
 	@echo "📋 要件: Windows"
-	cd flet_app && flet build windows --verbose
+	cd flet_app && flet pack main.py --name "Kishax-G" --verbose
 
 build-linux:
-	@echo "🐧 Linux AppImageをビルド中..."
-	cd flet_app && flet build linux --verbose
+	@echo "🐧 Linux実行ファイルをビルド中..."
+	cd flet_app && flet pack main.py --name "Kishax-G" --verbose
 
 build-web:
 	@echo "🌐 Web PWAをビルド中..."
-	cd flet_app && flet build web --verbose
+	cd flet_app && flet publish main.py --verbose
 
 # 全プラットフォーム対応状況確認
 build-check:
