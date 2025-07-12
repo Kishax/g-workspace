@@ -42,9 +42,9 @@ jobs:
           branch_name="${{ github.head_ref }}"
           echo "🔍 ブランチ名チェック: $branch_name"
 
-          if [[ ! $branch_name =~ ^(feature|fix|hotfix)/.+ ]]; then
+          if [[ ! $branch_name =~ ^(feature|fix|hotfix|test)/.+ ]]; then
             echo "❌ ブランチ名が Git-Flow 規約に従っていません"
-            echo "正しい形式: feature/xxx, fix/xxx, hotfix/xxx"
+            echo "正しい形式: feature/xxx, fix/xxx, hotfix/xxx, test/xxx"
             exit 1
           fi
 
@@ -164,59 +164,6 @@ jobs:
           
           echo "merged_branch=$branch_name" >> $GITHUB_OUTPUT
           echo "✅ 最終的なブランチ名: $branch_name"
-
-      - name: PR作成通知
-        if: false  # この通知は無効化（develop pushではPR情報が取得できないため）
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          channel: "#development"
-          text: |
-            📝 *新しいPRが作成されました*
-
-            *タイトル*: ${{ github.event.pull_request.title }}
-            *作成者*: ${{ github.actor }}
-            *ブランチ*: `${{ github.head_ref }}` → `develop`
-            *リンク*: ${{ github.event.pull_request.html_url }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      - name: エラー通知
-        if: failure()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: failure
-          channel: "#development"
-          text: |
-            ❌ *ワークフローでエラーが発生しました*
-
-            *リポジトリ*: ${{ github.repository }}
-            *ブランチ*: ${{ github.ref }}
-            *実行者*: ${{ github.actor }}
-            *エラー詳細*: GitHub Actionsのログを確認してください
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      - name: 詳細Slack通知
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          channel: "#development"
-          username: "Git-Flow Bot"
-          icon_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-          text: |
-            🚀 *開発進捗通知*
-
-            ✅ *ステータス*: PRマージ完了
-            📂 *プロジェクト*: ${{ github.repository }}
-            🌿 *ブランチ*: `${{ steps.merged-info.outputs.merged_branch }}` → `develop`
-            👤 *担当者*: ${{ github.actor }}
-            📅 *時刻*: ${{ github.event.head_commit.timestamp }}
-            🔗 *コミット*: ${{ github.event.head_commit.message }}
-
-            次のステップ: ローカルで `make sync` を実行してください
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   # 3. mainブランチ更新時（リリース時）の自動処理
   main-released:
