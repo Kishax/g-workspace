@@ -1,6 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api import auth, mails, files, servers

@@ -21,6 +21,26 @@ class AIService:
       # 初期モデルの作成
       self.train_initial_model()
 
+  def train_initial_model(self):
+    """初期スパム検出モデルを訓練"""
+    # 基本的なダミーモデルを作成
+    vectorizer = TfidfVectorizer(max_features=1000)
+    model = MultinomialNB()
+    
+    # ダミーデータで訓練（実際の実装では適切な訓練データを使用）
+    dummy_texts = ["normal email content", "spam buy now click here"]
+    dummy_labels = [0, 1]
+    
+    X = vectorizer.fit_transform(dummy_texts)
+    model.fit(X, dummy_labels)
+    
+    self.spam_model = {'vectorizer': vectorizer, 'model': model}
+    
+    # モデルを保存
+    os.makedirs("models", exist_ok=True)
+    with open("models/spam_model.pkl", "wb") as f:
+      pickle.dump(self.spam_model, f)
+
   @staticmethod
   async def check_spam(text: str) -> float:
     """スパム検出"""

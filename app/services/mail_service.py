@@ -1,6 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 from app.config import settings
 from app.models.mail import Mail
 from app.models.user import User
