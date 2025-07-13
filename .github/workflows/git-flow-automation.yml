@@ -42,9 +42,9 @@ jobs:
           branch_name="${{ github.head_ref }}"
           echo "🔍 ブランチ名チェック: $branch_name"
 
-          if [[ ! $branch_name =~ ^(feature|fix|hotfix|test)/.+ ]]; then
+          if [[ ! $branch_name =~ ^(feature|fix|hotfix|test|chore)/.+ ]]; then
             echo "❌ ブランチ名が Git-Flow 規約に従っていません"
-            echo "正しい形式: feature/xxx, fix/xxx, hotfix/xxx, test/xxx"
+            echo "正しい形式: feature/xxx, fix/xxx, hotfix/xxx, test/xxx, chore/xxx"
             exit 1
           fi
 
@@ -129,39 +129,39 @@ jobs:
         id: merged-info
         run: |
           echo "🔍 マージ情報を収集中..."
-          
+
           # 最新のマージコミットを取得
           merge_commit=$(git log --merges --oneline -1 --pretty=format:"%H %s")
           echo "merge_commit=$merge_commit" >> $GITHUB_OUTPUT
           echo "📝 マージコミット: $merge_commit"
-          
+
           # マージされたブランチ名を複数の方法で取得
           branch_name=""
-          
+
           # 方法1: マージコミットメッセージから抽出
           if [[ "$merge_commit" =~ "Merge pull request" ]]; then
             branch_name=$(echo "$merge_commit" | grep -o 'from [^/]*/[^[:space:]]*' | cut -d'/' -f2-)
             echo "🌿 方法1で取得: $branch_name"
           fi
-          
+
           # 方法2: git show-branchから取得
           if [[ -z "$branch_name" ]]; then
             branch_name=$(git show-branch --merge-base HEAD~1 HEAD | grep -o '\[.*\]' | head -1 | tr -d '[]')
             echo "🌿 方法2で取得: $branch_name"
           fi
-          
+
           # 方法3: 直前のコミットから推測
           if [[ -z "$branch_name" ]]; then
             branch_name=$(git log --oneline -1 --pretty=format:"%s" | grep -o 'feature/[^[:space:]]*\|fix/[^[:space:]]*\|hotfix/[^[:space:]]*' | head -1)
             echo "🌿 方法3で取得: $branch_name"
           fi
-          
+
           # デフォルト値を設定
           if [[ -z "$branch_name" ]]; then
             branch_name="unknown-branch"
             echo "⚠️ ブランチ名を特定できませんでした"
           fi
-          
+
           echo "merged_branch=$branch_name" >> $GITHUB_OUTPUT
           echo "✅ 最終的なブランチ名: $branch_name"
 
