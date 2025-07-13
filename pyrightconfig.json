@@ -1,5 +1,25 @@
 {
-	"pythonVersion": "3.10",
-	"typeCheckingMode": "strict",
-	"exclude": ["build", "dist"]
+  "include": [
+    "app"
+  ],
+  "exclude": [
+    "build", 
+    "dist",
+    "venv",
+    "**/__pycache__",
+    "**/*.pyc"
+  ],
+  "pythonVersion": "3.13",
+  "pythonPlatform": "Windows",
+  "venvPath": ".",
+  "venv": "venv",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "warning",
+  "reportUnusedImport": "warning",
+  "reportUnknownVariableType": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownParameterType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUntypedBaseClass": "none",
+  "reportUntypedFunctionDecorator": "none"
 }

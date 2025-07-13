@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List
 from app.database import get_db
 from app.services.mail_service import MailService
 from app.services.auth_service import AuthService
