@@ -9,25 +9,25 @@ from app.config import settings
 
 # FastAPI アプリケーション
 app = FastAPI(
-    title="Kishax G Project API",
-    description="Google Workspace Alternative System",
-    version="1.0.0",
-    docs_url="/docs" if settings.DEBUG else None,
-    redoc_url="/redoc" if settings.DEBUG else None,
+  title="Kishax G Project API",
+  description="Google Workspace Alternative System",
+  version="1.0.0",
+  docs_url="/docs" if settings.DEBUG else None,
+  redoc_url="/redoc" if settings.DEBUG else None,
 )
 
 # CORS設定
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+  CORSMiddleware,
+  allow_origins=settings.ALLOWED_ORIGINS,
+  allow_credentials=True,
+  allow_methods=["*"],
+  allow_headers=["*"],
 )
 
 # Prometheus メトリクス
 if settings.ENABLE_METRICS:
-    Instrumentator().instrument(app).expose(app)
+  Instrumentator().instrument(app).expose(app)
 
 # データベース初期化
 Base.metadata.create_all(bind=engine)

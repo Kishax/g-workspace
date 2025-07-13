@@ -1,27 +1,32 @@
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+from pydantic import BaseModel
+
+
 class UserBase(BaseModel):
-    kid: str
-    username: str
-    email: str
-    avatar_url: Optional[str] = None
+  kid: str
+  username: str
+  email: str
+  avatar_url: Optional[str] = None
+
 
 class UserCreate(UserBase):
-    discord_id: str
+  discord_id: str
+
 
 class UserResponse(UserBase):
-    id: int
-    discord_id: str
-    is_verified_maintainer: bool
-    is_active: bool
-    created_at: datetime
-    updated_at: Optional[datetime] = None
-    
-    class Config:
-        from_attributes = True
+  id: int
+  discord_id: str
+  is_verified_maintainer: bool
+  is_active: bool
+  created_at: datetime
+  updated_at: Optional[datetime] = None
+
+  class Config:
+    from_attributes = True
+
 
 class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str
+  access_token: str
+  token_type: str

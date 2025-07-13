@@ -11,6 +11,7 @@ help:
 	@echo "sync         : developブランチを最新に同期"
 	@echo "new-feature  : 新しいfeatureブランチを作成（NAME=ブランチ名）"
 	@echo "new-fix      : 新しいfixブランチを作成（NAME=ブランチ名）"
+	@echo "new-chore    : 新しいchoreブランチを作成（NAME=ブランチ名）"
 	@echo "commit       : コミット実行（MSG=メッセージ）"
 	@echo "push         : 現在のブランチをpush"
 	@echo "pr-ready     : PR用の最終確認"
@@ -118,6 +119,19 @@ new-fix:
 	git pull --rebase origin develop
 	git checkout -b fix/$(NAME)
 	@echo "✅ fix/$(NAME) ブランチを作成しました"
+
+# 新しいchoreブランチを作成
+new-chore:
+	@if [ -z "$(NAME)" ]; then \
+		echo "❌ エラー: NAME=ブランチ名 を指定してください"; \
+		echo "例: make new-chore NAME=update-deps"; \
+		exit 1; \
+	fi
+	@echo "🔧 新しいchoreブランチを作成中..."
+	git checkout develop
+	git pull --rebase origin develop
+	git checkout -b chore/$(NAME)
+	@echo "✅ chore/$(NAME) ブランチを作成しました"
 
 # コミット実行（Git-Flow規約に従う）
 commit:
@@ -390,7 +404,14 @@ workflow:
 	@echo "   make push"
 	@echo "   # GitHub上でPR作成"
 	@echo ""
-	@echo "3️⃣  定期メンテナンス:"
+	@echo "3️⃣  メンテナンス・雑務:"
+	@echo "   make new-chore NAME=作業内容"
+	@echo "   # メンテナンス作業"
+	@echo "   make commit MSG=\"chore: 作業内容\""
+	@echo "   make push"
+	@echo "   # GitHub上でPR作成"
+	@echo ""
+	@echo "4️⃣  定期メンテナンス:"
 	@echo "   make sync          # developを最新に"
 	@echo "   make cleanup       # 不要ブランチ削除"
 	@echo "   make fetch         # リモート情報更新"
