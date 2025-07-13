@@ -124,6 +124,33 @@ docker compose up db redis -d
 ```
 
 #### 4. アプリケーション起動（ローカル）
+
+**Windows環境の場合（推奨）:**
+```bash
+# ⚠️ 重要: pip install -r requirements.txt はWindowsでエラーになります
+
+# Python依存関係インストール（個別インストール推奨）
+pip install fastapi uvicorn sqlalchemy alembic python-multipart requests
+pip install scikit-learn==1.7.0 --only-binary=all
+pip install pandas --only-binary=all
+pip install streamlit --only-binary=all
+pip install flet --only-binary=all
+
+# または安全版を使用
+pip install -r requirements-windows-safe.txt
+# 上記の後に個別で: pip install streamlit --only-binary=all など
+
+# FastAPI サーバー起動
+uvicorn app.main:app --reload
+
+# Streamlit 管理画面起動（別ターミナル）
+streamlit run streamlit_app/main.py
+
+# Flet デスクトップアプリ起動（別ターミナル）
+python flet_app/main.py
+```
+
+**その他環境の場合:**
 ```bash
 # Python依存関係インストール
 pip install -r requirements.txt
@@ -793,6 +820,19 @@ ENABLE_METRICS=true
 - **コピーするだけ**: `cp .env.example .env` で基本設定完了
 - **段階的拡張**: 必要な機能に応じて外部サービス設定を追加
 - **セキュリティ**: JWT_SECRET_KEYは必ず変更してください
+
+## 🔧 Windows環境での追加セットアップ
+
+**Windows開発者の方**: Windows環境特有の問題・解決策・最適化手順については、専用ガイドをご確認ください。
+
+📋 **[Windows環境セットアップガイド](./WINDOWS-SETUP.md)**
+- Windows開発者向け最速セットアップ手順
+- よくある問題と即効解決法
+- Fletアプリ Windows EXEビルド方法  
+- コンパイラ設定・トラブルシューティング
+
+💡 **Windows用追加ファイル:**
+- `requirements-windows-safe.txt` - コンパイラ不要の安全版パッケージリスト
 
 ### 🔧 詳細セットアップ（ローカル開発）
 

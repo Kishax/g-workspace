@@ -1,23 +1,63 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-pydantic==2.5.0
-pydantic-settings==2.1.0
-sqlalchemy==2.0.23
-psycopg2-binary==2.9.9
-alembic==1.13.0
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
-boto3==1.34.0
-celery==5.3.4
-redis==5.0.1
-openai==1.3.8
-scikit-learn==1.3.2
-streamlit==1.28.2
-flet==0.15.0
-pandas==2.1.4
-requests==2.31.0
-prometheus-fastapi-instrumentator==6.1.0
-pytest==7.4.3
-pytest-asyncio==0.21.1
+# ===================================================================
+# 🚨 Windows環境の方へ重要な注意事項
+# ===================================================================
+# Windows環境では "pip install -r requirements.txt" でエラーが発生する場合があります。
+# 代わりに、以下の個別インストール手順を使用してください：
+#
+# 1. 基本パッケージ:
+#    pip install fastapi uvicorn sqlalchemy alembic python-multipart requests
+#
+# 2. 機械学習・データ分析:
+#    pip install scikit-learn==1.7.0 --only-binary=all
+#    pip install pandas --only-binary=all
+#
+# 3. UI フレームワーク:
+#    pip install streamlit --only-binary=all
+#    pip install flet --only-binary=all
+#    pip install pyinstaller
+#
+# 4. その他（必要に応じて）:
+#    pip install boto3 celery redis openai pytest pytest-asyncio httpx
+#
+# 詳細な手順は WINDOWS-SETUP.md をご確認ください。
+# ===================================================================
+
+# コアWebフレームワーク
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+sqlalchemy>=2.0.23
+alembic>=1.13.0
+python-multipart>=0.0.6
+requests>=2.31.0
+
+# 認証・セキュリティ（オプション）
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# データベース
+psycopg-binary>=3.2.0
+
+# 機械学習・データ分析（Windows: 個別インストール推奨）
+scikit-learn>=1.7.0
+pandas>=2.2.0
+
+# UI フレームワーク（Windows: 個別インストール推奨）
+streamlit>=1.28.0
+flet>=0.15.0
+
+# ビルドツール
+pyinstaller>=6.0.0
+
+# 外部サービス（オプション）
+boto3>=1.34.0
+celery>=5.3.4
+redis>=5.0.1
+openai>=1.3.8
+
+# 監視・メトリクス（オプション）
+prometheus-fastapi-instrumentator>=6.1.0
+
+# テスト
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
 httpx>=0.24.1,<0.25.0
